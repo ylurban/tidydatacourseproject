@@ -1,9 +1,11 @@
-## Data reading- training data
+setwd("~/Desktop/CourseEra_Data Science/Getting and Cleaning Data/Course Project"
+
+## Read training data
 training_x<-read.csv("UCI HAR Dataset/train/X_train.txt", sep="", header=FALSE)
 training_y<-read.csv("UCI HAR Dataset/train/y_train.txt",sep="",header=FALSE)
 training_sub<-read.csv("UCI HAR Dataset/train/subject_train.txt",sep="",header=FALSE)
 
-## Data reading- testing data
+## Read testing data
 testing_x<-read.csv("UCI HAR Dataset/test/X_test.txt", sep="", header=FALSE)
 testing_y<-read.csv("UCI HAR Dataset/test/y_test.txt", sep="", header=FALSE)
 testing_sub<-read.csv("UCI HAR Dataset/test/subject_test.txt", sep="", header=FALSE)
@@ -31,7 +33,32 @@ names(data_x)<-features[MeanSdFeatures,2]
 colnames(MergedData)<-c(features$V2,"Activity","Subject")
 colnames(MergedData)<-tolower(colnames(MergedData))
 
+features = read.csv("UCI HAR Dataset/features.txt", sep="", header=FALSE)
+features[,2] = gsub('-mean', 'Mean', features[,2])
+features[,2] = gsub('-std', 'Std', features[,2])
+features[,2] = gsub('[-()]', '', features[,2])
+
+currentActivity = 1
+for (currentActivityLabel in activityLabels$V2) {
+        MergedData$activity <- gsub(currentActivity, currentActivityLabel, MergedData$activity)
+        currentActivity <- currentActivity + 1
+}
+
+MergedData$activity <- as.factor(MergedData$activity)
+MergedData$subject <- as.factor(MergedData$subject)
+
+
+
+
 ## Create a second, independent tidy data set with the average of each variable for each activity and each subject.
+
+tidydata = aggregate(MergedData, by=list(activity = MergedData$activity, subject=MergedData$subject), mean)
+
+write.table(tidy, "tidy.txt", sep="\t")
+
+
+
+
 Data2<-aggregate(. ~subject + activity, MergedData, mean)
 Data2<-Data2[order(Data2$subject,Data2$activity),]
 write.table(Data2, file = "tidydata.txt",row.name=FALSE)
